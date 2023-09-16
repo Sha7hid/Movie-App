@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native'
 var {width, height} = Dimensions.get('window')
 export default function TrendingMovies({data}) {
  const navigation = useNavigation();
-    const handleClick = () =>{
+    const handleClick = (item) =>{
 navigation.navigate('Movie',item)
  }
     return (
@@ -26,7 +26,7 @@ navigation.navigate('Movie',item)
 
 const MovieCard = ({item,handleClick}) => {
     return (
-        <TouchableWithoutFeedback onPress={handleClick}>
+        <TouchableWithoutFeedback onPress={() =>handleClick(item)}>
             <Image
             source={require('../assets/atime.jpg')}
             style={{
