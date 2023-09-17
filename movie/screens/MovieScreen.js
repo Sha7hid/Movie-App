@@ -7,6 +7,7 @@ import {LinearGradient} from 'expo-linear-gradient'
 import Cast from '../components/cast';
 import MovieList from '../components/movieList';
 import Loading from '../components/loading';
+import { fetchMovieCredits, fetchMovieDetails, fetchSimilarMovies, image500 } from '../api/moviedb';
 var {width, height} = Dimensions.get('window')
 const ios = Platform.OS ==='ios';
 const topMargin =  ios? '':'mt-3';
@@ -15,13 +16,34 @@ export default function MovieScreen() {
     const {params: item} = useRoute();
     const [isFavourite,toggleFavourite] = useState(false)
     const navigation = useNavigation();
-    const [cast, setCast] = useState([1,2,3,4,5])
-    const [similarMovies, setSimilarMovies] = useState([1,2,3,4,5])
+    const [cast, setCast] = useState([])
+    const [similarMovies, setSimilarMovies] = useState([])
     const [loading,setLoading] = useState(false)
+    const [movie,setMovie] = useState({})
     useEffect(()=>{
-
+// console.log('itemid:',item.id)
+setLoading(true)
+getMovieDetails(item.id)
+getMovieCredits(item.id)
+getSimilarMovies(item.id)
     },[item])
 
+    const getMovieDetails = async id=>{
+        const data = await fetchMovieDetails(id)
+        // console.log('got movie details:',data)
+        if(data) setMovie(data)
+        setLoading(false)
+    } 
+    const getMovieCredits = async id=>{
+        const data = await fetchMovieCredits(id)
+        // console.log('got credits:',data)
+        if(data && data.cast) setCast(data.cast)
+    }
+    const getSimilarMovies = async id=>{
+        const data = await fetchSimilarMovies(id)
+        // console.log('got credits:',data)
+        if(data && data.results) setSimilarMovies(data.results)
+    }
   return (
   <ScrollView
   contentContainerStyle={{paddingBottom:20}}
@@ -43,7 +65,7 @@ export default function MovieScreen() {
     ):(
 <View>
     <Image
-   source={require('../assets/atime.jpg')}
+   source={{uri: image500(movie?.poster_path)}}
    style={{width,height:height*0.55}} 
     />
     <LinearGradient
@@ -62,33 +84,49 @@ export default function MovieScreen() {
 <View style={{marginTop: -(height*0.09)}} className="space-y-3">
 {/* title */}
 <Text className="text-white text-center text-3xl font-bold tracking-wider">
-    {moviename}
+    {movie?.title}
 </Text>
 {/* status , release, runtime */}
+{
+    movie?.id? (
 <Text className="text-neutral-400 font-semibold text-base text-center">
-    Released * 2023 * 52 min
+   {movie?.status} * {movie?.release_date?.split('-')[0]} * {movie?.runtime} min
 </Text>
+    ):null
+}
+
 {/* genres */}
 <View className="flex-row justify-center mx-4 space-x-2">
-    <Text className="text-neutral-400 font-semibold text-base text-center">
-Romance *
-    </Text>
-    <Text className="text-neutral-400 font-semibold text-base text-center">
+    {
+        movie?.genres?.map((genre,index)=>{
+            let showDot = index+1 != movie.genres.length;
+            return(
+                <Text key={index} className="text-neutral-400 font-semibold text-base text-center">
+                {genre?.name} {showDot? "*":null}
+                    </Text>
+            )
+        })
+    }
+    
+ 
+    {/* <Text className="text-neutral-400 font-semibold text-base text-center">
 Mystery * 
     </Text>
     <Text className="text-neutral-400 font-semibold text-base text-center">
 Fantasy
-    </Text>
+    </Text> */}
 </View>
 {/* description */}
 <Text className="text-neutral-400 mx-4 tracking-wide">
-A grieving woman magically travels through time to 1998, where she meets a man with an uncanny resemblance to her late love.
+{
+    movie?.overview
+}
 </Text>
 </View>
 {/* cast */}
 <Cast navigation={navigation} cast={cast}/>
 {/* similar movies */}
-{/* <MovieList title="Similar Movies" hideSeeAll={true} data={similarMovies}/> */}
+<MovieList title="Similar Movies" hideSeeAll={true} data={similarMovies}/>
   </ScrollView>
   )
 }
