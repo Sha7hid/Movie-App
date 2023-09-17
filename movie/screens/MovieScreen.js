@@ -6,6 +6,7 @@ import { styles, theme } from '../theme';
 import {LinearGradient} from 'expo-linear-gradient'
 import Cast from '../components/cast';
 import MovieList from '../components/movieList';
+import Loading from '../components/loading';
 var {width, height} = Dimensions.get('window')
 const ios = Platform.OS ==='ios';
 const topMargin =  ios? '':'mt-3';
@@ -16,6 +17,7 @@ export default function MovieScreen() {
     const navigation = useNavigation();
     const [cast, setCast] = useState([1,2,3,4,5])
     const [similarMovies, setSimilarMovies] = useState([1,2,3,4,5])
+    const [loading,setLoading] = useState(false)
     useEffect(()=>{
 
     },[item])
@@ -35,6 +37,10 @@ export default function MovieScreen() {
     <HeartIcon size="35" color={isFavourite? theme.background : "white"}/>
 </TouchableOpacity>
 </SafeAreaView>
+{
+    loading? (
+<Loading/>
+    ):(
 <View>
     <Image
    source={require('../assets/atime.jpg')}
@@ -48,6 +54,9 @@ export default function MovieScreen() {
     className="absolute bottom-0"
     />
 </View>
+    )
+}
+
 </View>
 {/* movie details */}
 <View style={{marginTop: -(height*0.09)}} className="space-y-3">
@@ -79,7 +88,7 @@ A grieving woman magically travels through time to 1998, where she meets a man w
 {/* cast */}
 <Cast navigation={navigation} cast={cast}/>
 {/* similar movies */}
-<MovieList title="Similar Movies" hideSeeAll={true} data={similarMovies}/>
+{/* <MovieList title="Similar Movies" hideSeeAll={true} data={similarMovies}/> */}
   </ScrollView>
   )
 }
